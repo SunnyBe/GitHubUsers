@@ -1,8 +1,11 @@
-package com.sundayndu.githubusers
+package com.sundayndu.githubusers.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.sundayndu.githubusers.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
