@@ -24,13 +24,31 @@ class MainViewModel @Inject constructor(
         MutableSharedFlow()
     val uIUsers: SharedFlow<ResultState<List<GithubUser>>> get() = _userListQuery.asSharedFlow()
 
+    private val _userDetailQuery: MutableSharedFlow<ResultState<GithubUser>> =
+        MutableSharedFlow()
+    val uIDetails: SharedFlow<ResultState<GithubUser>> get() = _userDetailQuery.asSharedFlow()
+
     fun userListQuery(query: String?) {
         // UI also does string check and cleanup
-        query?.let { q ->
-            viewModelScope.launch(dispatcher) {
+        viewModelScope.launch(dispatcher) {
+            query?.let { q ->
                 userRepo.queryUserList(q)
                     .collectLatest { result ->
                         _userListQuery.emit(result)
+                    }
+
+            } ?: run {
+                _userListQuery.emit(ResultState.Error(NullPointerException("The value for query is null, make sure you're passing a valid value for query!")))
+            }
+        }
+    }
+
+    fun fetchUserDetail(userName: String?) {
+        viewModelScope.launch(dispatcher) {
+            userName?.let { user ->
+                userRepo.fetchUserDetail(user)
+                    .collectLatest { result ->
+                        _userDetailQuery.emit(result)
                     }
             }
         }

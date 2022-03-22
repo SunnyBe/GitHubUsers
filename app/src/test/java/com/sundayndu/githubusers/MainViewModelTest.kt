@@ -6,7 +6,7 @@ import com.sundayndu.githubusers.data.repository.UserRepository
 import com.sundayndu.githubusers.presentation.MainViewModel
 import com.sundayndu.githubusers.utils.GitHubTestModels
 import com.sundayndu.githubusers.utils.ResultState
-import junit.framework.Assert.assertEquals
+import junit.framework.Assert.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
@@ -43,25 +43,109 @@ class MainViewModelTest {
 
     @After
     fun cleanUp() {
-        
+
     }
 
     @Test
-    fun requestUserListUpdatesUiUsersSharedFlowResultStateSuccess() = runBlockingTest(testDispatcher) {
-        // When
-        Mockito.`when`(userRepository.queryUserList(loginName))
-            .thenReturn(flowOf(ResultState.Success(GitHubTestModels.userList)))
+    fun requestUserListUpdatesUiUsersSharedFlowResultStateSuccess() =
+        runBlockingTest(testDispatcher) {
+            // When
+            Mockito.`when`(userRepository.queryUserList(loginName))
+                .thenReturn(flowOf(ResultState.Success(GitHubTestModels.userList)))
 
-        mainViewModel.uIUsers.test {
-            // Then
-            mainViewModel.userListQuery(loginName)
-            val actualItem = awaitItem()
-            // Assert
-            assertEquals(ResultState.Success::class, actualItem::class)
-            assertEquals(ResultState.Success(GitHubTestModels.userList), actualItem)
-            assertEquals(ResultState.Success(GitHubTestModels.userList).data.firstOrNull()?.login, loginName)
-            cancelAndConsumeRemainingEvents()
+            mainViewModel.uIUsers.test {
+                // Then
+                mainViewModel.userListQuery(loginName)
+                val actualItem = awaitItem()
+                // Assert
+                assertEquals(ResultState.Success::class, actualItem::class)
+                assertEquals(ResultState.Success(GitHubTestModels.userList), actualItem)
+                assertEquals(
+                    ResultState.Success(GitHubTestModels.userList).data.firstOrNull()?.login,
+                    loginName
+                )
+                cancelAndConsumeRemainingEvents()
+            }
         }
-    }
+
+    @Test
+    fun requestUserListUpdatesUiUsersSharedFlowResultStateError() =
+        runBlockingTest(testDispatcher) {
+            // When
+            Mockito.`when`(userRepository.queryUserList(loginName))
+                .thenReturn(flowOf(ResultState.Error(Throwable("Test exception occurred"))))
+
+            mainViewModel.uIUsers.test {
+                // Then
+                mainViewModel.userListQuery(loginName)
+                val actualItem = awaitItem()
+                // Assert
+                assertEquals(ResultState.Error::class, actualItem::class)
+                assertEquals(
+                    "Test exception occurred",
+                    (actualItem as ResultState.Error).error.message
+                )
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun requestUserListUpdatesUiUsersSharedFlowResultStateLoadingWithoutData() =
+        runBlockingTest(testDispatcher) {
+            // When
+            Mockito.`when`(userRepository.queryUserList(loginName))
+                .thenReturn(flowOf(ResultState.Loading(null)))
+
+            mainViewModel.uIUsers.test {
+                // Then
+                mainViewModel.userListQuery(loginName)
+                val actualItem = awaitItem()
+                // Assert
+                assertEquals(ResultState.Loading::class, actualItem::class)
+                assertNull((actualItem as ResultState.Loading).data)
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun requestUserListUpdatesUiUsersSharedFlowResultStateLoadingWithLatestData() =
+        runBlockingTest(testDispatcher) {
+            // When
+            Mockito.`when`(userRepository.queryUserList(loginName))
+                .thenReturn(flowOf(ResultState.Loading(GitHubTestModels.userList)))
+
+            mainViewModel.uIUsers.test {
+                // Then
+                mainViewModel.userListQuery(loginName)
+                val actualItem = awaitItem()
+                // Assert
+                assertEquals(ResultState.Loading::class, actualItem::class)
+                assertNotNull((actualItem as ResultState.Loading).data)
+                assertEquals(actualItem.data?.firstOrNull()?.login, loginName)
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
+    @Test
+    fun requestUserDetailUpdatesUiUserDetailSharedFlowResultStateSuccess() =
+        runBlockingTest(testDispatcher) {
+            // When
+            Mockito.`when`(userRepository.fetchUserDetail("SunnyBe"))
+                .thenReturn(flowOf(ResultState.Success(GitHubTestModels.user)))
+
+            mainViewModel.uIDetails.test {
+                // Then
+                mainViewModel.fetchUserDetail("SunnyBe")
+                val actualItem = awaitItem()
+                // Assert
+                assertEquals(ResultState.Success::class, actualItem::class)
+                assertEquals(ResultState.Success(GitHubTestModels.user), actualItem)
+                assertEquals(
+                    ResultState.Success(GitHubTestModels.user).data.login,
+                    loginName
+                )
+                cancelAndConsumeRemainingEvents()
+            }
+        }
 
 }

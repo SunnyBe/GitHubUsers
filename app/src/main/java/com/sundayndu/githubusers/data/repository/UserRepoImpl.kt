@@ -16,4 +16,8 @@ class UserRepoImpl @Inject constructor(
     override fun queryUserList(query: String): Flow<ResultState<List<GithubUser>>> {
         TODO("Not yet implemented")
     }
+
+    override fun fetchUserDetail(user: String): Flow<ResultState<GithubUser>> {
+        TODO("Not yet implemented")
+    }
 }

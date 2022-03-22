@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
     fun queryUserList(query: String): Flow<ResultState<List<GithubUser>>>
+    fun fetchUserDetail(user: String): Flow<ResultState<GithubUser>>
 }
