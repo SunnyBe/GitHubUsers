@@ -148,4 +148,6 @@ class MainViewModelTest {
             }
         }
 
+    // Todo Add remaining test cases for the UiDetail
+
 }
