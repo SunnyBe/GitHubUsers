@@ -4,6 +4,7 @@ import com.sundayndu.githubusers.BuildConfig
 import com.sundayndu.githubusers.data.network.NetworkService
 import com.sundayndu.githubusers.data.repository.UserRepoImpl
 import com.sundayndu.githubusers.data.repository.UserRepository
+import com.sundayndu.githubusers.di.qualifiers.IoDispatcher
 import com.sundayndu.githubusers.utils.Configs.NETWORK_REQUEST_TIMEOUT
 import dagger.Module
 import dagger.Provides
@@ -25,12 +26,6 @@ object ServiceModule {
 
     @Provides
     @Singleton
-    fun provideAppDispatcher(): AppDispatcher {
-        return AppDispatcherImpl()
-    }
-
-    @Provides
-    @Singleton
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
@@ -47,7 +42,10 @@ object ServiceModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(networkService: NetworkService, appDispatcher: AppDispatcher): UserRepository {
+    fun provideUserRepository(
+        networkService: NetworkService,
+        @IoDispatcher appDispatcher: CoroutineDispatcher
+    ): UserRepository {
         return UserRepoImpl(networkService, appDispatcher)
     }
 
