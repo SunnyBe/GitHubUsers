@@ -114,16 +114,18 @@ class UserListFragment : Fragment() {
     private fun presentResult(result: ResultState<List<GithubUser>>) {
         when (result) {
             is ResultState.Success -> {
+                binding.listLoadingProgress.visibility = View.GONE
                 if (result.data.isNotEmpty()) {
                     userListAdapter.submitList(result.data)
                     userListAdapter.notifyDataSetChanged()
                 }
             }
             is ResultState.Error -> {
+                binding.listLoadingProgress.visibility = View.GONE
                 notifyUserBySnackBar(result.error.toString())
             }
             is ResultState.Loading -> {
-
+                binding.listLoadingProgress.visibility = View.VISIBLE
             }
         }
     }
