@@ -76,15 +76,14 @@ object ServiceModule {
 
     private fun headerInterceptor(): Interceptor {
         return object : Interceptor {
-            override fun intercept(chain: Interceptor.Chain): Response {
-                var original = chain.request()
-                val url = original.url.newBuilder()
-                    .addQueryParameter("Accept", "application/vnd.github.v3+json")
-                    .build()
-                original = original.newBuilder().url(url).build()
-                return chain.proceed(original)
+            override fun intercept(chain: Interceptor.Chain): Response = chain.run {
+                proceed(
+                    request()
+                        .newBuilder()
+                        .addHeader("Accept", "application/vnd.github.v3+json")
+                        .build()
+                )
             }
-
         }
     }
 }

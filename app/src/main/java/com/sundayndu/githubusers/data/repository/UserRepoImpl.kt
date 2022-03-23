@@ -8,6 +8,7 @@ import com.sundayndu.githubusers.utils.extensions.onStartAndErrorResultState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
 
 class UserRepoImpl @Inject constructor(
@@ -18,8 +19,10 @@ class UserRepoImpl @Inject constructor(
 
     override fun queryUserList(query: String): Flow<ResultState<List<GithubUser>>> {
         return flow<ResultState<List<GithubUser>>> {
-            val users = networkService.queryUsers(query)
+            val users = networkService.queryUsers(query).items
             emit(ResultState.Success(users))
+            dbService.usersDao().delete()
+            dbService.usersDao().insert(users = users.toTypedArray())
         }
             .onStartAndErrorResultState(appDispatcher)
     }

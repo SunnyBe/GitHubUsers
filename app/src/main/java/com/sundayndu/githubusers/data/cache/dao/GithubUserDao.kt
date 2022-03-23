@@ -9,6 +9,10 @@ import com.sundayndu.githubusers.model.GithubUser
 interface GithubUserDao {
     @Query("SELECT * FROM GithubUser")
     suspend fun selectUsers(): List<GithubUser>
+
     @Insert
     suspend fun insert(vararg users: GithubUser)
+
+    @Query("DELETE FROM githubuser")
+    suspend fun delete()
 }
