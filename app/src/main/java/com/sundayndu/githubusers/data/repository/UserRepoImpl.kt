@@ -4,8 +4,10 @@ import com.sundayndu.githubusers.data.cache.GitHubDatabase
 import com.sundayndu.githubusers.data.network.NetworkService
 import com.sundayndu.githubusers.model.GithubUser
 import com.sundayndu.githubusers.utils.ResultState
+import com.sundayndu.githubusers.utils.extensions.onStartAndErrorResultState
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class UserRepoImpl @Inject constructor(
@@ -19,26 +21,21 @@ class UserRepoImpl @Inject constructor(
             val users = networkService.queryUsers(query)
             emit(ResultState.Success(users))
         }
-            .onStart {
-                emit(ResultState.Loading())
-            }
-            .catch { cause ->
-                emit(ResultState.Error(cause))
-            }
-            .flowOn(appDispatcher)
+            .onStartAndErrorResultState(appDispatcher)
     }
 
     override fun fetchUserDetail(user: String): Flow<ResultState<GithubUser>> {
         return flow<ResultState<GithubUser>> {
-            val users = networkService.userDetails(user)
-            emit(ResultState.Success(users))
+            val user = networkService.userDetails(user)
+            emit(ResultState.Success(user))
         }
-            .onStart {
-                emit(ResultState.Loading())
-            }
-            .catch { cause ->
-                emit(ResultState.Error(cause))
-            }
-            .flowOn(appDispatcher)
+            .onStartAndErrorResultState(appDispatcher)
+    }
+
+    override fun lastUserList(): Flow<ResultState<List<GithubUser>>> {
+        return flow {
+            val users = dbService.usersDao().selectUsers()
+            emit(ResultState.Success(users))
+        }.onStartAndErrorResultState(appDispatcher)
     }
 }
