@@ -1,4 +1,4 @@
-package com.sundayndu.githubusers.presentation
+package com.sundayndu.githubusers.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,36 +16,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class UserDetailViewModel @Inject constructor(
     private val userRepo: UserRepository,
     @MainDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
-    private val _userListQuery: MutableSharedFlow<ResultState<List<GithubUser>>> =
-        MutableSharedFlow()
-    val uIUsers: SharedFlow<ResultState<List<GithubUser>>> get() = _userListQuery.asSharedFlow()
 
     private val _userDetailQuery: MutableSharedFlow<ResultState<GithubUser>> =
         MutableSharedFlow()
     val uIDetails: SharedFlow<ResultState<GithubUser>> get() = _userDetailQuery.asSharedFlow()
 
-    init {
-        latestUserList()
-    }
-
-    fun userListQuery(query: String?) {
-        // UI also does string check and cleanup
-        viewModelScope.launch(dispatcher) {
-            query?.let { q ->
-                userRepo.queryUserList(q)
-                    .collectLatest { result ->
-                        _userListQuery.emit(result)
-                    }
-
-            } ?: run {
-                _userListQuery.emit(ResultState.Error(NullPointerException("The value for query is null, make sure you're passing a valid value for query!")))
-            }
-        }
-    }
 
     fun fetchUserDetail(userName: String?) {
         viewModelScope.launch(dispatcher) {
@@ -54,19 +33,9 @@ class MainViewModel @Inject constructor(
                     .collectLatest { result ->
                         _userDetailQuery.emit(result)
                     }
-            }?: run {
-                _userListQuery.emit(ResultState.Error(NullPointerException("The value for username is null, make sure you're passing a valid value for userName!")))
+            } ?: run {
+                _userDetailQuery.emit(ResultState.Error(NullPointerException("The value for username is null, make sure you're passing a valid value for userName!")))
             }
         }
     }
-
-    fun latestUserList() {
-        viewModelScope.launch(dispatcher) {
-            userRepo.lastUserList()
-                .collectLatest { result ->
-                    _userListQuery.emit(result)
-                }
-        }
-    }
-
 }

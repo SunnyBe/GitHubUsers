@@ -3,7 +3,7 @@ package com.sundayndu.githubusers
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.sundayndu.githubusers.data.repository.UserRepository
-import com.sundayndu.githubusers.presentation.MainViewModel
+import com.sundayndu.githubusers.presentation.users.MainViewModel
 import com.sundayndu.githubusers.utils.GitHubTestModels
 import com.sundayndu.githubusers.utils.ResultState
 import junit.framework.Assert.*
@@ -182,85 +182,6 @@ class MainViewModelTest {
                 assertEquals(ResultState.Loading::class, actualItem::class)
                 assertNotNull((actualItem as ResultState.Loading).data)
                 assertEquals(actualItem.data?.firstOrNull()?.login, loginName)
-                cancelAndConsumeRemainingEvents()
-            }
-        }
-
-    @Test
-    fun requestUserDetailUpdatesUiUserDetailSharedFlowResultStateSuccess() =
-        runBlockingTest(testDispatcher) {
-            // When
-            Mockito.`when`(userRepository.fetchUserDetail("SunnyBe"))
-                .thenReturn(flowOf(ResultState.Success(GitHubTestModels.user)))
-
-            mainViewModel.uIDetails.test {
-                // Then
-                mainViewModel.fetchUserDetail("SunnyBe")
-                val actualItem = awaitItem()
-                // Assert
-                assertEquals(ResultState.Success::class, actualItem::class)
-                assertEquals(ResultState.Success(GitHubTestModels.user), actualItem)
-                assertEquals(
-                    ResultState.Success(GitHubTestModels.user).data.login,
-                    loginName
-                )
-                cancelAndConsumeRemainingEvents()
-            }
-        }
-    @Test
-    fun requestUserDetailsUpdatesUiDetailsSharedFlowResultStateError() =
-        runBlockingTest(testDispatcher) {
-            // When
-            Mockito.`when`(userRepository.fetchUserDetail("SunnyBe"))
-                .thenReturn(flowOf(ResultState.Error(Throwable("Test exception occurred"))))
-
-            mainViewModel.uIDetails.test {
-                // Then
-                mainViewModel.fetchUserDetail("SunnyBe")
-                val actualItem = awaitItem()
-                // Assert
-                assertEquals(ResultState.Error::class, actualItem::class)
-                assertEquals(
-                    "Test exception occurred",
-                    (actualItem as ResultState.Error).error.message
-                )
-                cancelAndConsumeRemainingEvents()
-            }
-        }
-
-    @Test
-    fun requestUserDetailsUpdatesUiDetailsSharedFlowResultStateLoadingWithoutData() =
-        runBlockingTest(testDispatcher) {
-            // When
-            Mockito.`when`(userRepository.fetchUserDetail("SunnyBe"))
-                .thenReturn(flowOf(ResultState.Loading(null)))
-
-            mainViewModel.uIDetails.test {
-                // Then
-                mainViewModel.fetchUserDetail("SunnyBe")
-                val actualItem = awaitItem()
-                // Assert
-                assertEquals(ResultState.Loading::class, actualItem::class)
-                assertNull((actualItem as ResultState.Loading).data)
-                cancelAndConsumeRemainingEvents()
-            }
-        }
-
-    @Test
-    fun requestUserDetailsUpdatesUiDetailsSharedFlowResultStateLoadingWithLatestData() =
-        runBlockingTest(testDispatcher) {
-            // When
-            Mockito.`when`(userRepository.fetchUserDetail("SunnyBe"))
-                .thenReturn(flowOf(ResultState.Loading(GitHubTestModels.user)))
-
-            mainViewModel.uIDetails.test {
-                // Then
-                mainViewModel.fetchUserDetail("SunnyBe")
-                val actualItem = awaitItem()
-                // Assert
-                assertEquals(ResultState.Loading::class, actualItem::class)
-                assertNotNull((actualItem as ResultState.Loading).data)
-                assertEquals(actualItem.data?.login, loginName)
                 cancelAndConsumeRemainingEvents()
             }
         }

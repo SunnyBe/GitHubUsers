@@ -1,4 +1,4 @@
-package com.sundayndu.githubusers.presentation
+package com.sundayndu.githubusers.presentation.users
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,7 +10,7 @@ import com.sundayndu.githubusers.R
 import com.sundayndu.githubusers.databinding.UserItemBinding
 import com.sundayndu.githubusers.model.GithubUser
 
-class UserListAdapter(val onUserSelected: (GithubUser) -> Unit) :
+class UserListAdapter(private val itemSelectionListener: ItemSelectionListener) :
     ListAdapter<GithubUser, UserListAdapter.UserViewHolder>(DIFF_UTIL) {
     companion object {
         val DIFF_UTIL = object : DiffUtil.ItemCallback<GithubUser>() {
@@ -24,13 +24,12 @@ class UserListAdapter(val onUserSelected: (GithubUser) -> Unit) :
         }
     }
 
-    class UserViewHolder(private val binding: UserItemBinding) :
+    class UserViewHolder(val binding: UserItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(user: GithubUser?) {
             user?.let { u ->
                 binding.userTitle.text = u.login
                 binding.userContext.text = u.htmlURL
-
                 Glide
                     .with(binding.root.context)
                     .load(u.avatarURL)
@@ -50,7 +49,11 @@ class UserListAdapter(val onUserSelected: (GithubUser) -> Unit) :
         val selectedUser = getItem(position)
         holder.bind(selectedUser)
         holder.itemView.setOnClickListener {
-            onUserSelected(selectedUser)
+            itemSelectionListener.itemClicked(selectedUser)
+        }
+        holder.itemView.setOnLongClickListener {
+            itemSelectionListener.itemLongClicked(selectedUser, holder.binding)
+            true
         }
     }
 
