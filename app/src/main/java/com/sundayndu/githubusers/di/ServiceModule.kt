@@ -1,14 +1,19 @@
 package com.sundayndu.githubusers.di
 
+import android.content.Context
+import androidx.room.Room
 import com.sundayndu.githubusers.BuildConfig
+import com.sundayndu.githubusers.data.cache.GitHubDatabase
 import com.sundayndu.githubusers.data.network.NetworkService
 import com.sundayndu.githubusers.data.repository.UserRepoImpl
 import com.sundayndu.githubusers.data.repository.UserRepository
 import com.sundayndu.githubusers.di.qualifiers.IoDispatcher
+import com.sundayndu.githubusers.utils.Configs
 import com.sundayndu.githubusers.utils.Configs.NETWORK_REQUEST_TIMEOUT
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.Interceptor
@@ -44,11 +49,18 @@ object ServiceModule {
     @Singleton
     fun provideUserRepository(
         networkService: NetworkService,
+        dbService: GitHubDatabase,
         @IoDispatcher appDispatcher: CoroutineDispatcher
     ): UserRepository {
-        return UserRepoImpl(networkService, appDispatcher)
+        return UserRepoImpl(networkService, dbService, appDispatcher)
     }
 
+    @Provides
+    @Singleton
+    fun provideUserDatabase(@ApplicationContext context: Context): GitHubDatabase {
+        return Room.databaseBuilder(context, GitHubDatabase::class.java, Configs.DB_NAME)
+            .build()
+    }
 
     private fun httpClient(): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor().apply {

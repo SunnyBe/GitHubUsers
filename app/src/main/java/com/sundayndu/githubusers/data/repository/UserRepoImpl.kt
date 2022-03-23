@@ -1,5 +1,6 @@
 package com.sundayndu.githubusers.data.repository
 
+import com.sundayndu.githubusers.data.cache.GitHubDatabase
 import com.sundayndu.githubusers.data.network.NetworkService
 import com.sundayndu.githubusers.model.GithubUser
 import com.sundayndu.githubusers.utils.ResultState
@@ -9,6 +10,7 @@ import javax.inject.Inject
 
 class UserRepoImpl @Inject constructor(
     private val networkService: NetworkService,
+    private val dbService: GitHubDatabase,
     private val appDispatcher: CoroutineDispatcher
 ) : UserRepository {
 
