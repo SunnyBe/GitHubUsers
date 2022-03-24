@@ -1,13 +1,19 @@
 package com.sundayndu.githubusers.di
 
+import android.content.Context
+import androidx.room.Room
 import com.sundayndu.githubusers.BuildConfig
+import com.sundayndu.githubusers.data.cache.GitHubDatabase
 import com.sundayndu.githubusers.data.network.NetworkService
 import com.sundayndu.githubusers.data.repository.UserRepoImpl
 import com.sundayndu.githubusers.data.repository.UserRepository
+import com.sundayndu.githubusers.di.qualifiers.IoDispatcher
+import com.sundayndu.githubusers.utils.Configs
 import com.sundayndu.githubusers.utils.Configs.NETWORK_REQUEST_TIMEOUT
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.Interceptor
@@ -22,12 +28,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ServiceModule {
-
-    @Provides
-    @Singleton
-    fun provideAppDispatcher(): AppDispatcher {
-        return AppDispatcherImpl()
-    }
 
     @Provides
     @Singleton
@@ -47,10 +47,20 @@ object ServiceModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(networkService: NetworkService, appDispatcher: AppDispatcher): UserRepository {
-        return UserRepoImpl(networkService, appDispatcher)
+    fun provideUserRepository(
+        networkService: NetworkService,
+        dbService: GitHubDatabase,
+        @IoDispatcher appDispatcher: CoroutineDispatcher
+    ): UserRepository {
+        return UserRepoImpl(networkService, dbService, appDispatcher)
     }
 
+    @Provides
+    @Singleton
+    fun provideUserDatabase(@ApplicationContext context: Context): GitHubDatabase {
+        return Room.databaseBuilder(context, GitHubDatabase::class.java, Configs.DB_NAME)
+            .build()
+    }
 
     private fun httpClient(): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
@@ -66,15 +76,14 @@ object ServiceModule {
 
     private fun headerInterceptor(): Interceptor {
         return object : Interceptor {
-            override fun intercept(chain: Interceptor.Chain): Response {
-                var original = chain.request()
-                val url = original.url.newBuilder()
-                    .addQueryParameter("Accept", "application/vnd.github.v3+json")
-                    .build()
-                original = original.newBuilder().url(url).build()
-                return chain.proceed(original)
+            override fun intercept(chain: Interceptor.Chain): Response = chain.run {
+                proceed(
+                    request()
+                        .newBuilder()
+                        .addHeader("Accept", "application/vnd.github.v3+json")
+                        .build()
+                )
             }
-
         }
     }
 }

@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">GitHubUsers</string>
+    <string name="page_title">GitHub Users</string>
+    <string name="favorite">Favorite</string>
+    <string name="search">Search</string>
+    <string name="more">More</string>
+    <string name="content_description_favorite">Favorite Users</string>
+    <string name="content_description_search">Search Users</string>
+    <string name="content_description_more">More options</string>
+    <string name="test_string_label_medium">This is a medium length test string, not too long and not to short. This should be enough.</string>
 </resources>
