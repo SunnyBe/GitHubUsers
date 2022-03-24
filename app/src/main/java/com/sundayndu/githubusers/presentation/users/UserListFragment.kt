@@ -41,7 +41,7 @@ class UserListFragment : Fragment() {
         }
 
         override fun itemLongClicked(user: GithubUser, itemBinding: UserItemBinding) {
-            inflateUserContext(user, itemBinding)
+            navigateToDetailsPage(user)
         }
     })
 
@@ -117,7 +117,6 @@ class UserListFragment : Fragment() {
                 binding.listLoadingProgress.visibility = View.GONE
                 if (result.data.isNotEmpty()) {
                     userListAdapter.submitList(result.data)
-                    userListAdapter.notifyDataSetChanged()
                 }
             }
             is ResultState.Error -> {
@@ -133,10 +132,6 @@ class UserListFragment : Fragment() {
     private fun notifyUserBySnackBar(msg: String?) {
         Log.e(javaClass.simpleName, msg.toString())
         Snackbar.make(binding.root, msg.toString(), Snackbar.LENGTH_SHORT).show()
-    }
-
-    private fun inflateUserContext(user: GithubUser, itemBinding: UserItemBinding) {
-
     }
 
     private fun navigateToDetailsPage(user: GithubUser) {

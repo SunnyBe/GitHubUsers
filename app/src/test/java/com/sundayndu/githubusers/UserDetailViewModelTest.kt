@@ -7,6 +7,7 @@ import com.sundayndu.githubusers.presentation.detail.UserDetailViewModel
 import com.sundayndu.githubusers.utils.GitHubTestModels
 import com.sundayndu.githubusers.utils.ResultState
 import junit.framework.Assert
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.After
@@ -17,6 +18,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
+@ExperimentalCoroutinesApi
 class UserDetailViewModelTest {
 
     @get:Rule
